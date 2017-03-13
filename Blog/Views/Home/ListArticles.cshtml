@@ -4,6 +4,7 @@
     ViewBag.Title = "List";
 }
 
+@using TimeAgo;
 <div class="container">
     <div class="row">
         @foreach (var article in Model)
@@ -14,6 +15,9 @@
                         <h2>
                             @Html.ActionLink(@article.Title, "Details", "Article", new { @id = article.Id }, null)
                         </h2>
+                        <small class="author pull-right">
+                            <strong>@article.DateAdded.TimeAgo()</strong>
+                        </small>
                     </header>
                     <p>
                         @article.Content

@@ -4,12 +4,16 @@
     ViewBag.Title = "Details";
 }
 
+@using TimeAgo;
 <div class="container">
     <article>
         <header>
             <h2>
                 @Model.Title
             </h2>
+            <small class="author pull-right">
+                <strong>@Model.DateAdded.TimeAgo()</strong>
+            </small>
         </header>
         <p>
             @Model.Content

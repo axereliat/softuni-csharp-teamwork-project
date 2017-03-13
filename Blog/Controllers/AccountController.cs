@@ -153,7 +153,7 @@ namespace Blog.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Email, FullName = model.FullName, Email = model.Email,
-                    Image = "NoAvatarYet"};
+                    Image = "NoAvatarYet", Gender = model.Gender};
                 var result = await UserManager.CreateAsync(user, model.Password);
 
                 //var addRoleToResult = UserManager.AddToRole(user.Id, "User");
