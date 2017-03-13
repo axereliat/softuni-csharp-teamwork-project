@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+        <div class="form-group">
+            <p>Choose your avatar:</p>
+            <div class="col-md-10">
+
+                <label class="btn btn-default btn-file">
+                    Browse <input name="file" id="file" type="file" hidden>
+                </label>
+                <br />
+                <input type="submit" value="Upload">
+            </div>
+        </div>
+}
