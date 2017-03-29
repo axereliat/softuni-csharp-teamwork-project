@@ -38,6 +38,8 @@ namespace Blog.Models
 
         public virtual ApplicationUser Author { get; set; }
 
+        public int viewCounter { get; set; }
+
         public bool IsAuthor(string name) {
             return this.Author.UserName.Equals(name);
         }

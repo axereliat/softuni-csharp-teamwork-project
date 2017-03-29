@@ -1,4 +1,5 @@
 ﻿using Blog.Models;
+using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -19,7 +20,7 @@ namespace Blog.Controllers
         }
 
         // GET: /Article/List
-        public ActionResult List()
+        public ActionResult List(int page = 1, int pageSize = 4)
         {
             using (var database = new BlogDbContext())
             {
@@ -29,7 +30,8 @@ namespace Blog.Controllers
                     .Include(a => a.Category)
                     .ToList();
 
-                return View(articles);
+                var model = new PagedList<Article>(articles, page, pageSize);
+                return View(model);
             }
         }
 
@@ -48,6 +50,11 @@ namespace Blog.Controllers
                 if (article == null) {
                     return HttpNotFound();
                 }
+
+                article.viewCounter++;
+
+                database.Entry(article).State = EntityState.Modified;
+                database.SaveChanges();
 
                 return View(article);
             }

@@ -1,10 +1,16 @@
-﻿@model List<Blog.Models.Article>
+﻿@model PagedList.IPagedList<Blog.Models.Article>
 
 @{
     ViewBag.Title = "List";
 }
 
 @using TimeAgo;
+@using PagedList.Mvc
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
 <div class="container">
     <div class="row">
         @foreach (var article in Model)
@@ -42,4 +48,7 @@
         }
     </div>
 </div>
+@Html.PagedListPager(Model, page => Url.Action("List",
+            new { page, pageSize = Model.PageSize }))
+        Showing @Model.FirstItemOnPage to @Model.LastItemOnPage of @Model.TotalItemCount Articles
 <hr />

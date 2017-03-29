@@ -1,4 +1,5 @@
 ﻿using Blog.Models;
+using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -49,12 +50,14 @@ namespace Blog.Controllers
             }
         }
 
-        public ActionResult ListArticles(int? categoryId)
+        public ActionResult ListArticles(int? categoryId, int page = 1, int pageSize = 4)
         {
             if (categoryId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+
+            ViewBag.currentCategoryId = categoryId;
 
             using (var database = new BlogDbContext())
             {
@@ -64,7 +67,8 @@ namespace Blog.Controllers
                     .Include(a => a.Tags)
                     .ToList();
 
-                return View(articles);
+                var model = new PagedList<Article>(articles, page, pageSize);
+                return View(model);
             }
         }
     }
