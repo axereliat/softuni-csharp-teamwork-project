@@ -14,7 +14,6 @@ namespace Blog.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
         [StringLength(50)]
         public string Title { get; set; }
 
@@ -23,7 +22,8 @@ namespace Blog.Models
 
         public virtual Category Category { get; set; }
 
-        [Required]
+        public virtual string CurrentComment { get; set; }
+        
         public string Content { get; set; }
 
         public virtual ICollection<Tag> Tags {
@@ -31,11 +31,13 @@ namespace Blog.Models
             set { this.tags = value; }
         }
 
+        public virtual ICollection<Comment> Comments { get; set; }
+
         public DateTime DateAdded { get; set; }
 
         [ForeignKey("Author")]
         public string AuthorId { get; set; }
-
+        
         public virtual ApplicationUser Author { get; set; }
 
         public int viewCounter { get; set; }
@@ -46,6 +48,7 @@ namespace Blog.Models
 
         public Article() {
             this.tags = new HashSet<Tag>();
+            this.Comments = new HashSet<Comment>();
         }
 
         public Article(string authorId, string title, string content, int categoryId) {
@@ -54,6 +57,7 @@ namespace Blog.Models
             this.Content = content;
             this.CategoryId = categoryId;
             this.tags = new HashSet<Tag>();
+            this.Comments = new HashSet<Comment>();
         }
     }
 }

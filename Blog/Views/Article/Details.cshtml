@@ -5,7 +5,12 @@
 }
 
 @using TimeAgo;
+@using Microsoft.AspNet.Identity
 <div class="container">
+@using (Html.BeginForm("Details", "Article", FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary()
     <article>
         <header>
             <h2>
@@ -30,5 +35,46 @@
             @Html.ActionLink("Back", "Index", "Article", null, new { @class = "btn btn-default btn-xs" })
         </footer>
     </article>
-</div>
+    <br />
+
+    <div class="form-group">
+        <h4>Write a comment:</h4>
+        <div>
+            @Html.TextAreaFor(m => m.CurrentComment, new { @class = "form-control", @rows = "7", @required = true })
+        </div>
+        <input type="submit" value="Submit" class="btn btn-success" />
+
+    </div>
+    if (Model.Comments.Any())
+    {
+        <h4>Comments: @Model.Comments.Count</h4>
+        <ul class="list-group">
+            @foreach (var comment in Model.Comments.OrderByDescending(c => c.DateAdded))
+            {
+                <li class="list-group-item">
+                @if (File.Exists(Server.MapPath($"~/Content/Avatars/avatar_{comment.AuthorId}.jpg")))
+                {
+                <img src='@Url.Content($"~/Content/Avatars/avatar_{comment.AuthorId}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="60px" />
+                }
+                else
+                {
+                    <img src='@Url.Content($"~/Content/Avatars/No-Avatar-High-Definition.jpg")' height="60px" />
+                }
+                <span style="color: blue">@comment.Author.FullName</span> <small class="author">@comment.DateAdded.TimeAgo()</small>
+                @if (User.IsInRole("Admin") || Model.IsAuthor(User.Identity.Name))
+                {
+                    @Html.ActionLink("Delete", $"DeleteComment", "Article", new { @id = comment.Id, @articleId = Model.Id }, new { @class = "btn btn-danger btn-xs", @onclick = "return confirm('Are you sure?')" })
+                }
+                </li>
+
+                <br />
+                <p>@comment.Content</p>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No comments yet...</p>
+    }
+}
 <hr />

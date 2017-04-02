@@ -50,6 +50,23 @@ namespace Blog.Controllers
             }
         }
 
+        [Authorize]
+        public ActionResult MyArticles(int page = 1, int pageSize = 4)
+        {
+            using (var database = new BlogDbContext())
+            {
+                var articles = database.Articles
+                    .Where(a => a.Author.Email == User.Identity.Name)
+                    .Include(a => a.Author)
+                    .Include(a => a.Tags)
+                    .Include(a => a.Category)
+                    .ToList();
+
+                var model = new PagedList<Article>(articles, page, pageSize);
+                return View(model);
+            }
+        }
+
         public ActionResult ListArticles(int? categoryId, int page = 1, int pageSize = 4)
         {
             if (categoryId == null)

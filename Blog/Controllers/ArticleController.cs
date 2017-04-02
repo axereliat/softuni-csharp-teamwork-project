@@ -45,7 +45,8 @@ namespace Blog.Controllers
                     .Where(a => a.Id == id)
                     .Include(a => a.Author)
                     .Include(a => a.Tags)
-                    .First();
+                    .Include(a => a.Comments.Select(c => c.Author))
+                    .FirstOrDefault();
 
                 if (article == null) {
                     return HttpNotFound();
@@ -57,6 +58,49 @@ namespace Blog.Controllers
                 database.SaveChanges();
 
                 return View(article);
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ActionName("Details")]
+        public ActionResult DetailsConfirmed(int? id, Article article1)
+        {
+            if (!ModelState.IsValid) {
+                return RedirectToAction("asdas");
+            }
+            using (var database = new BlogDbContext())
+            {
+                var article = database.Articles
+                    .Where(a => a.Id == id)
+                    .Include(a => a.Author)
+                    .Include(a => a.Tags)
+                    .Include(a => a.Comments)
+                    .FirstOrDefault();
+                var userId = database.Users
+                        .Where(u => u.UserName == this.User.Identity.Name)
+                        .First()
+                        .Id;
+                var user = database.Users
+                        .Where(u => u.UserName == this.User.Identity.Name)
+                        .First();
+
+                var comment = new Comment();
+                comment.DateAdded = DateTime.Now;
+                comment.AuthorId = userId;
+                comment.Author = user;
+                comment.ArticleId = article.Id;
+                comment.Content = article1.CurrentComment;
+
+                article.Comments.Add(comment);
+
+                database.Entry(article).State = EntityState.Modified;
+                database.Comments.Add(comment);
+                database.SaveChanges();
+
+                ModelState.Clear();
+
+                return Redirect($"/Article/Details/{id}");
             }
         }
 
@@ -249,6 +293,33 @@ namespace Blog.Controllers
                 database.SaveChanges();
 
                 return RedirectToAction("Index");
+            }
+        }
+
+        // Get: DeleteComment
+        public ActionResult DeleteComment(int? id, int? articleId)
+        {
+            if (id == null || articleId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var comment = database.Comments
+                    .FirstOrDefault(c => c.Id == id);
+                var article = database.Articles
+                    .FirstOrDefault(a => a.Id == articleId);
+
+                if (comment == null || article == null)
+                {
+                    return HttpNotFound();
+                }
+
+                database.Comments.Remove(comment);
+                database.SaveChanges();
+
+                return Redirect($"/Article/Details/{articleId}");
             }
         }
 
