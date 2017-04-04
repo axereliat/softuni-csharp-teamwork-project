@@ -61,14 +61,19 @@ namespace Blog.Controllers
                     .Include(a => a.Tags)
                     .Include(a => a.Category)
                     .ToList();
-
+                
                 var model = new PagedList<Article>(articles, page, pageSize);
                 return View(model);
             }
         }
 
-        public ActionResult ListArticles(int? categoryId, int page = 1, int pageSize = 4)
+        //[HttpGet]
+        public ActionResult ListArticles(int? categoryId, string SearchTxt, int page = 1, int pageSize = 4)
         {
+            ViewBag.SearchErrorMsg = "";
+            if (SearchTxt == null) {
+                SearchTxt = "";
+            }
             if (categoryId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -79,13 +84,21 @@ namespace Blog.Controllers
             using (var database = new BlogDbContext())
             {
                 var articles = database.Articles
-                    .Where(a => a.CategoryId == categoryId)
+                    .Where(a => a.CategoryId == categoryId && a.Title.Contains(SearchTxt))
                     .Include(a => a.Author)
                     .Include(a => a.Tags)
                     .ToList();
 
+                if (!articles.Any())
+                {
+                    ViewBag.SearchErrorMsg = "No articles...";
+                }
+
+                var model1 = new ArticleViewModel();
+
                 var model = new PagedList<Article>(articles, page, pageSize);
-                return View(model);
+                model1.PagedArticles = model;
+                return View(model1);
             }
         }
     }

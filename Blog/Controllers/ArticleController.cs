@@ -31,7 +31,8 @@ namespace Blog.Controllers
                     .ToList();
 
                 var model = new PagedList<Article>(articles, page, pageSize);
-                return View(model);
+                //return View(model);
+                return Redirect("/Home/ListCategories");
             }
         }
 
@@ -46,7 +47,20 @@ namespace Blog.Controllers
                     .Include(a => a.Author)
                     .Include(a => a.Tags)
                     .Include(a => a.Comments.Select(c => c.Author))
+                    .Include(a => a.UsersLikes)
                     .FirstOrDefault();
+
+                var user = database.Users
+                    .Where(a => a.Email == this.User.Identity.Name)
+                    .FirstOrDefault();
+
+                if (article.UsersLikes.Contains(user))
+                {
+                    ViewBag.hasUserLiked = true;
+                }
+                else {
+                    ViewBag.hasUserLiked = false;
+                }
 
                 if (article == null) {
                     return HttpNotFound();
@@ -58,6 +72,51 @@ namespace Blog.Controllers
                 database.SaveChanges();
 
                 return View(article);
+            }
+        }
+
+        public ActionResult Like(int? id, string userName)
+        {
+            if (id == null || userName == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            using (var database = new BlogDbContext())
+            {
+                var article = database.Articles
+                    .Where(a => a.Id == id)
+                    .Include(a => a.Author)
+                    .Include(a => a.Tags)
+                    .Include(a => a.UsersLikes)
+                    .Include(a => a.Comments.Select(c => c.Author))
+                    .FirstOrDefault();
+
+
+                var user = database.Users
+                    .Where(a => a.Email == userName)
+                    .FirstOrDefault();
+
+                if (article == null || user == null)
+                {
+                    return HttpNotFound();
+                }
+                
+                
+                if (!article.UsersLikes.Contains(user))
+                {
+                    article.LikesCount++;
+                    article.UsersLikes.Add(user);
+                }
+                else {
+                    article.LikesCount--;
+                    article.UsersLikes.Remove(user);
+                }
+
+                database.Entry(article).State = EntityState.Modified;
+                database.SaveChanges();
+
+                return Redirect($"/Article/Details/{id}");
             }
         }
 

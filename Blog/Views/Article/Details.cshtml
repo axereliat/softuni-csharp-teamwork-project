@@ -34,6 +34,16 @@
             }
             @Html.ActionLink("Back", "Index", "Article", null, new { @class = "btn btn-default btn-xs" })
         </footer>
+                    @if (!ViewBag.hasUserLiked)
+                    {
+                        @Html.ActionLink("Like", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-success btn-xs" });
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Unlike", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-danger btn-xs" });
+                    }
+
+            @Model.LikesCount
     </article>
     <br />
 

@@ -1,4 +1,4 @@
-﻿@model PagedList.IPagedList<Blog.Models.Article>
+﻿@model Blog.Models.ArticleViewModel
 
 @{
     ViewBag.Title = "List";
@@ -12,8 +12,16 @@
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 <div class="container">
+@using (Html.BeginForm("ListArticles", "Home", FormMethod.Get, new { @class = "form-horizontal" }))
+{
+    <h3>Search:</h3>
+    @Html.TextBoxFor(m => m.SearchTxt, new { @class = "form-control" })
+    @Html.HiddenFor(m => m.CategoryId, new { @class = "form-control" })
+    <input type="submit" value="Submit" class="btn btn-success" />
+}
     <div class="row">
-        @foreach (var article in Model.OrderByDescending(a => a.viewCounter).ThenByDescending(a => a.DateAdded))
+        <h4>@ViewBag.SearchErrorMsg</h4>
+        @foreach (var article in Model.PagedArticles.OrderByDescending(a => a.viewCounter).ThenByDescending(a => a.DateAdded))
         {
             <div class="col-sm-6">
                 <article>
@@ -44,8 +52,8 @@
         }
     </div>
 </div>
-@Html.PagedListPager(Model, page => Url.Action("ListArticles",
-            new { categoryId = ViewBag.currentCategoryId, page, pageSize = Model.PageSize }))
-        Showing @Model.FirstItemOnPage to @Model.LastItemOnPage of @Model.TotalItemCount Articles
+@Html.PagedListPager(Model.PagedArticles, page => Url.Action("ListArticles",
+            new { categoryId = ViewBag.currentCategoryId, page, pageSize = Model.PagedArticles.PageSize }))
+        Showing @Model.PagedArticles.FirstItemOnPage to @Model.PagedArticles.LastItemOnPage of @Model.PagedArticles.TotalItemCount Articles
 <hr />
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
 
 namespace Blog.Models
 {
@@ -23,7 +24,7 @@ namespace Blog.Models
         public virtual Category Category { get; set; }
 
         public virtual string CurrentComment { get; set; }
-        
+
         public string Content { get; set; }
 
         public virtual ICollection<Tag> Tags {
@@ -41,6 +42,10 @@ namespace Blog.Models
         public virtual ApplicationUser Author { get; set; }
 
         public int viewCounter { get; set; }
+
+        public int LikesCount { get; set; }
+
+        public virtual ICollection<ApplicationUser> UsersLikes { get; set; }
 
         public bool IsAuthor(string name) {
             return this.Author.UserName.Equals(name);
