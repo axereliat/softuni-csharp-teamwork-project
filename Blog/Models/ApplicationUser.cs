@@ -20,6 +20,10 @@ namespace Blog.Models
 
         public string Gender { get; set; }
 
+        public virtual string BirthDateString { get; set; }
+
+        public DateTime BirthDate { get; set; }
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType

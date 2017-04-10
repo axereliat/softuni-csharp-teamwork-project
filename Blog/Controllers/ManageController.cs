@@ -104,6 +104,15 @@ namespace Blog.Controllers
             return Redirect("Home/Index");
         }
 
+        public ActionResult RemoveAvatar()
+        {
+            string path = Request.MapPath($"~/Content/Avatars/avatar_{this.User.Identity.GetUserId()}.jpg");
+            if (System.IO.File.Exists(path)) {
+                System.IO.File.Delete(path);
+            }
+            return Redirect("/Home/Index");
+        }
+
         //
         // POST: /Manage/RemoveLogin
         [HttpPost]

@@ -37,7 +37,7 @@ namespace Blog.Controllers
             return View();
         }
 
-        public ActionResult ListCategories()
+        public ActionResult ListCategories(string filter = "mostLiked")
         {
             using (var database = new BlogDbContext())
             {
@@ -46,7 +46,46 @@ namespace Blog.Controllers
                     .OrderBy(c => c.Name)
                     .ToList();
 
-                return View(categories);
+                var articles = database.Articles
+                    .OrderByDescending(a => a.LikesCount)
+                    .Include(a => a.Author)
+                    .Include(a => a.Tags)
+                    .Include(a => a.Category)
+                    .Include(a => a.Comments.Select(c => c.Author))
+                    .ToList();
+
+                if (filter.Equals("mostPopular"))
+                {
+                    articles = database.Articles
+                        .OrderByDescending(a => a.viewCounter)
+                        .Include(a => a.Author)
+                        .Include(a => a.Tags)
+                        .Include(a => a.Category)
+                        .Include(a => a.Comments.Select(c => c.Author))
+                        .ToList();
+                }
+
+                if (filter.Equals("newest"))
+                {
+                    articles = database.Articles
+                        .OrderByDescending(a => a.DateAdded)
+                        .Include(a => a.Author)
+                        .Include(a => a.Tags)
+                        .Include(a => a.Category)
+                        .Include(a => a.Comments.Select(c => c.Author))
+                        .ToList();
+                }
+
+                var comments = database.Comments
+                       .Where(c => c.Article.Author.UserName == User.Identity.Name && !c.Seen)
+                       .Count();
+
+                var model = new ArticleViewModel();
+                model.Categories = categories;
+                model.NewCommentsCount = comments;
+                model.Articles = articles;
+
+                return View(model);
             }
         }
 
@@ -61,18 +100,22 @@ namespace Blog.Controllers
                     .Include(a => a.Tags)
                     .Include(a => a.Category)
                     .ToList();
-                
+
                 var model = new PagedList<Article>(articles, page, pageSize);
                 return View(model);
             }
         }
 
-        //[HttpGet]
-        public ActionResult ListArticles(int? categoryId, string SearchTxt, int page = 1, int pageSize = 4)
+        public ActionResult ListArticles(int? categoryId, string SearchTxt, string SearchFor, int page = 1, int pageSize = 4)
         {
             ViewBag.SearchErrorMsg = "";
-            if (SearchTxt == null) {
+            if (SearchTxt == null)
+            {
                 SearchTxt = "";
+            }
+            if (SearchFor == null)
+            {
+                SearchFor = "articles";
             }
             if (categoryId == null)
             {
@@ -83,11 +126,23 @@ namespace Blog.Controllers
 
             using (var database = new BlogDbContext())
             {
-                var articles = database.Articles
-                    .Where(a => a.CategoryId == categoryId && a.Title.Contains(SearchTxt))
-                    .Include(a => a.Author)
-                    .Include(a => a.Tags)
-                    .ToList();
+                var articles = new List<Article>();
+                if (SearchFor.ToLower().Equals("articles"))
+                {
+                    articles = database.Articles
+                        .Where(a => a.CategoryId == categoryId && a.Title.Contains(SearchTxt))
+                        .Include(a => a.Author)
+                        .Include(a => a.Tags)
+                        .ToList();
+                }
+                else if (SearchFor.ToLower().Equals("users"))
+                {
+                    articles = database.Articles
+                        .Where(a => a.CategoryId == categoryId && a.Author.FullName.Contains(SearchTxt))
+                        .Include(a => a.Author)
+                        .Include(a => a.Tags)
+                        .ToList();
+                }
 
                 if (!articles.Any())
                 {
@@ -99,6 +154,22 @@ namespace Blog.Controllers
                 var model = new PagedList<Article>(articles, page, pageSize);
                 model1.PagedArticles = model;
                 return View(model1);
+            }
+        }
+
+        [Authorize]
+        public ActionResult NewComments()
+        {
+            using (var database = new BlogDbContext())
+            {
+                var model = database.Articles
+                    .Where(a => a.Author.UserName == this.User.Identity.Name)
+                    .Include(a => a.Author)
+                    .Include(a => a.Tags)
+                    .Include(a => a.Comments.Select(c => c.Author))
+                    .ToList();
+
+                return View(model);
             }
         }
     }

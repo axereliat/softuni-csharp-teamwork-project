@@ -1,12 +1,49 @@
-﻿@model List<Blog.Models.Category>
+﻿@model Blog.Models.ArticleViewModel
 
 @{
     ViewBag.Title = "List";
 }
 
+@using TimeAgo;
+
+<a href="/Home/NewComments" class="btn btn-success">New comments <span class="badge">@Model.NewCommentsCount</span></a>
+
+<h3>Top 5</h3>
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+        Show:
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+        <li>@Html.ActionLink("most liked", "ListCategories", "Home", new { @filter = "mostLiked" }, null)</li>
+        <li>@Html.ActionLink("most popular", "ListCategories", "Home", new { @filter = "mostPopular" }, null)</li>
+        <li>@Html.ActionLink("newest", "ListCategories", "Home", new { @filter = "newest" }, null)</li>
+    </ul>
+</div>
+
+<ul>
+    @foreach (var article in Model.Articles.Take(5))
+    {
+        <li>
+    @if (File.Exists(Server.MapPath($"~/Content/Articles/article_{article.Id}.jpg")))
+    {
+        <img src='@Url.Content($"~/Content/Articles/article_{article.Id}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="50px" />
+    }
+    else
+    {
+        <img src='@Url.Content($"~/Content/Articles/no-image.PNG")' height="50px" />
+    }
+    @Html.ActionLink(@article.Title, "Details", "Article", new { @id = article.Id }, null)
+    <small class="author"> - by @article.Author.FullName <small style="color:grey">Likes: @article.LikesCount, Views: @article.viewCounter</small></small>
+<small class="author pull-right">
+    <strong>@article.DateAdded.TimeAgo()</strong>
+</small></li>
+    }
+</ul>
+
 <div class="container">
     <div class="row">
-        @foreach (var category in Model)
+        @foreach (var category in Model.Categories)
         {
             <div class="col-sm-6 text-center text-uppercase">
                 <p>

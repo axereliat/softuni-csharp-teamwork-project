@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Models
@@ -82,6 +83,12 @@ namespace Blog.Models
         [Required]
         [Display(Name = "Gender")]
         public string Gender { get; set; }
+        
+        [Required]
+        [Display(Name = "BirthDate")]
+        public DateTime BirthDate { get; set; }
+        
+        public virtual string BirthDateString { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 1)]

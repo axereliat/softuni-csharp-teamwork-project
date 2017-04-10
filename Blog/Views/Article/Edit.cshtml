@@ -7,7 +7,7 @@
 <div class="container">
     <div class="well">
         <h2>Edit Article</h2>
-        @using (Html.BeginForm("Edit", "Article", FormMethod.Post, new { @class = "form-horizontal" }))
+        @using (Html.BeginForm("Edit", "Article", FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary()
@@ -33,6 +33,25 @@
                 @Html.LabelFor(m => m.Tags, new { @class = "control-label col-sm-4" })
                 <div class="col-sm-4">
                     @Html.TextBoxFor(m => m.Tags, new { @class = "form-control col-sm-4" })
+                </div>
+            </div>
+
+            if (File.Exists(Server.MapPath($"~/Content/Articles/article_{Model.Id}.jpg")))
+            {
+                <img src='@Url.Content($"~/Content/Articles/article_{Model.Id}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="100px" />
+            }
+            else
+            {
+                <img src='@Url.Content($"~/Content/Articles/no-image.PNG")' height="100px" />
+            }
+            <div class="form-group">
+                <p>Choose your avatar:</p>
+                <div class="col-md-10">
+                    <label class="btn btn-default btn-file">
+                        Browse <input name="file" id="file" type="file" hidden>
+                    </label>
+                    <br />
+                    <input type="submit" value="Upload">
                 </div>
             </div>
 

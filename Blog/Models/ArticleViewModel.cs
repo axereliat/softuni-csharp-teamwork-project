@@ -21,6 +21,8 @@ namespace Blog.Models
 
         public string SearchTxt { get; set; }
 
+        public string SearchFor { get; set; }
+
         public string AuthorId { get; set; }
 
         public PagedList.IPagedList<Article> PagedArticles { get; set; }
@@ -28,6 +30,7 @@ namespace Blog.Models
         public int CategoryId { get; set; }
         public ICollection<Article> Articles { get; set; }
         public List<Category> Categories { get; set; }
+        public int NewCommentsCount { get; set; }
         public Comment Comment { get; set; }
 
         public string Tags { get; set; }

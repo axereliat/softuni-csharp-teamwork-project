@@ -8,8 +8,6 @@
 @using TimeAgo;
 @using PagedList.Mvc
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 <div class="container">
 @using (Html.BeginForm("ListArticles", "Home", FormMethod.Get, new { @class = "form-horizontal" }))
@@ -17,6 +15,13 @@
     <h3>Search:</h3>
     @Html.TextBoxFor(m => m.SearchTxt, new { @class = "form-control" })
     @Html.HiddenFor(m => m.CategoryId, new { @class = "form-control" })
+
+    <h4>Search by:</h4>
+    <select class="selectpicker" id="SearchFor" name="SearchFor">
+        <option>Articles</option>
+        <option>Users</option>
+    </select>
+    
     <input type="submit" value="Submit" class="btn btn-success" />
 }
     <div class="row">
@@ -27,6 +32,14 @@
                 <article>
                     <header>
                         <h2>
+                            @if (File.Exists(Server.MapPath($"~/Content/Articles/article_{article.Id}.jpg")))
+                            {
+                                <img src='@Url.Content($"~/Content/Articles/article_{article.Id}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="50px" />
+                            }
+                            else
+                            {
+                                <img src='@Url.Content($"~/Content/Articles/no-image.PNG")' height="50px" />
+                            }
                             @Html.ActionLink(@article.Title, "Details", "Article", new { @id = article.Id }, null)
                         </h2>
                         <small class="author pull-right">

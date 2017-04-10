@@ -152,8 +152,26 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
+                var bd = DateTime.ParseExact(model.BirthDateString, "dd MMMM yyyy", CultureInfo.InvariantCulture);
+                var age = DateTime.Now.Year - bd.Year;
+                if (DateTime.Now.Year < bd.AddYears(age).Year) {
+                    age--;
+                }
+
+                if (age < 15) {
+                    ViewBag.ageErrorMessage = "You must be at least 15 years old.";
+                    return View(model);
+                }
+
+                if (age > 100)
+                {
+                    ViewBag.ageErrorMessage = "Please enter your real date of birth.";
+                    return View(model);
+                }
+
                 var user = new ApplicationUser { UserName = model.Email, FullName = model.FullName, Email = model.Email,
-                    Image = "NoAvatarYet", Gender = model.Gender};
+                    Image = "NoAvatarYet", Gender = model.Gender, BirthDate = DateTime.ParseExact(model.BirthDateString, "dd MMMM yyyy", CultureInfo.InvariantCulture)
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
 
                 //var addRoleToResult = UserManager.AddToRole(user.Id, "User");

@@ -12,20 +12,44 @@
     @Html.AntiForgeryToken()
     @Html.ValidationSummary()
     <article>
-        <header>
-            <h2>
-                @Model.Title
-            </h2>
-            <small class="author pull-right">
-                <strong>@Model.DateAdded.TimeAgo()</strong>
+        <div class="container">
+            <div class="col-md-6">
+            <header>
+                <h2>
+                    @Model.Title
+                </h2>
+            </header>
+            <p>
+                @Model.Content
+            </p>
+            <small class="author">
+                --author @Model.Author.FullName
             </small>
-        </header>
-        <p>
-            @Model.Content
-        </p>
-        <small class="author">
-            --author @Model.Author.FullName
-        </small>
+                </div>
+            <div class="col-md-6">
+                <small class="author pull-right">
+                    <strong>@Model.DateAdded.TimeAgo()</strong>
+                </small>
+            @if (File.Exists(Server.MapPath($"~/Content/Articles/article_{Model.Id}.jpg")))
+            {
+                <img src='@Url.Content($"~/Content/Articles/article_{Model.Id}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="200px" />
+            }
+            else
+            {
+                <img src='@Url.Content($"~/Content/Articles/no-image.PNG")' height="200px" />
+            }
+            </div>
+        </div>
+        @if (!ViewBag.hasUserLiked)
+        {
+            @Html.ActionLink("Like", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-success btn-xs" });
+        }
+        else
+        {
+            @Html.ActionLink("Unlike", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-danger btn-xs" });
+        }
+
+        @Model.LikesCount
         <footer class="pull-right">
             @if (User.IsInRole("Admin") || Model.IsAuthor(User.Identity.Name))
             {
@@ -34,16 +58,6 @@
             }
             @Html.ActionLink("Back", "Index", "Article", null, new { @class = "btn btn-default btn-xs" })
         </footer>
-                    @if (!ViewBag.hasUserLiked)
-                    {
-                        @Html.ActionLink("Like", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-success btn-xs" });
-                    }
-                    else
-                    {
-                        @Html.ActionLink("Unlike", "Like", "Article", new { @id = Model.Id, @userName = User.Identity.GetUserName() }, new { @class = "btn btn-danger btn-xs" });
-                    }
-
-            @Model.LikesCount
     </article>
     <br />
 
@@ -71,7 +85,7 @@
                     <img src='@Url.Content($"~/Content/Avatars/No-Avatar-High-Definition.jpg")' height="60px" />
                 }
                 <span style="color: blue">@comment.Author.FullName</span> <small class="author">@comment.DateAdded.TimeAgo()</small>
-                @if (User.IsInRole("Admin") || Model.IsAuthor(User.Identity.Name))
+                @if (User.IsInRole("Admin") || Model.IsAuthor(User.Identity.Name) || comment.AuthorId == User.Identity.GetUserId())
                 {
                     @Html.ActionLink("Delete", $"DeleteComment", "Article", new { @id = comment.Id, @articleId = Model.Id }, new { @class = "btn btn-danger btn-xs", @onclick = "return confirm('Are you sure?')" })
                 }

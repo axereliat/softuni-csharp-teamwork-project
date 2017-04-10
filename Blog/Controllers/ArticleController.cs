@@ -1,8 +1,10 @@
 ﻿using Blog.Models;
+using Microsoft.AspNet.Identity;
 using PagedList;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -75,6 +77,7 @@ namespace Blog.Controllers
             }
         }
 
+        [Authorize]
         public ActionResult Like(int? id, string userName)
         {
             if (id == null || userName == null)
@@ -151,8 +154,12 @@ namespace Blog.Controllers
                 comment.ArticleId = article.Id;
                 comment.Content = article1.CurrentComment;
 
-                article.Comments.Add(comment);
+                if (article.Author.UserName == this.User.Identity.Name) {
+                    comment.Seen = true;
+                }
 
+                article.Comments.Add(comment);
+                
                 database.Entry(article).State = EntityState.Modified;
                 database.Comments.Add(comment);
                 database.SaveChanges();
@@ -204,7 +211,7 @@ namespace Blog.Controllers
 
         // POST: /Article/Edit
         [HttpPost]
-        public ActionResult Edit(ArticleViewModel model)
+        public ActionResult Edit(ArticleViewModel model, HttpPostedFileBase file)
         {
             if (ModelState.IsValid)
             {
@@ -222,6 +229,28 @@ namespace Blog.Controllers
 
                     database.Entry(article).State = EntityState.Modified;
                     database.SaveChanges();
+
+                    // file upload
+
+                    ViewBag.isSuccesfulThumbUpload = false;
+                    if (file != null)
+                    {
+                        if (file.ContentLength > 0)
+                        {
+                            if (Path.GetExtension(file.FileName).ToLower() == ".jpg")
+                            {
+                                var fileName = "article_" + article.Id;
+                                fileName += Path.GetExtension(file.FileName);
+                                var path = Path.Combine(Server.MapPath("~/Content/Articles"), fileName);
+                                file.SaveAs(path);
+                                ViewBag.isSuccesfulThumbUpload = true;
+                            }
+                        }
+                    }
+                    if (ViewBag.isSuccesfulThumbUpload == false && file != null)
+                    {
+                        return Redirect($"/Article/Edit/{model.Id}");
+                    }
 
                     return RedirectToAction("Index");
                 }
@@ -270,7 +299,7 @@ namespace Blog.Controllers
         // Post: Article/Create
         [HttpPost]
         [Authorize]
-        public ActionResult Create(ArticleViewModel model) {
+        public ActionResult Create(ArticleViewModel model, HttpPostedFileBase file) {
             if (ModelState.IsValid) {
                 using (var database = new BlogDbContext())
                 {
@@ -287,6 +316,28 @@ namespace Blog.Controllers
 
                     database.Articles.Add(article);
                     database.SaveChanges();
+
+                    // file upload
+
+                    ViewBag.isSuccesfulThumbUpload = false;
+                    if (file != null)
+                    {
+                        if (file.ContentLength > 0)
+                        {
+                            if (Path.GetExtension(file.FileName).ToLower() == ".jpg")
+                            {
+                                var fileName = "article_" + article.Id;
+                                fileName += Path.GetExtension(file.FileName);
+                                var path = Path.Combine(Server.MapPath("~/Content/Articles"), fileName);
+                                file.SaveAs(path);
+                                ViewBag.isSuccesfulThumbUpload = true;
+                            }
+                        }
+                    }
+                    if (ViewBag.isSuccesfulThumbUpload == false)
+                    {
+                        return Redirect("/Create");
+                    }
 
                     return RedirectToAction("Index");
                 }

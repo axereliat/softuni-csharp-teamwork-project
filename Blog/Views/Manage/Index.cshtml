@@ -17,6 +17,7 @@
         @if (File.Exists(Server.MapPath($"~/Content/Avatars/avatar_{User.Identity.GetUserId()}.jpg")))
         {
             <img src='@Url.Content($"~/Content/Avatars/avatar_{User.Identity.GetUserId()}.jpg?v={DateTime.Now.ToString("yyyyMMddHHmmss")}")' height="200px" />
+            @Html.ActionLink("Remove", "RemoveAvatar", "Manage", new { @class = "btn btn-danger btn-xs", @onclick = "return confirm('Are you sure you want to remove your avatar?');" })
         }
         else
         {
